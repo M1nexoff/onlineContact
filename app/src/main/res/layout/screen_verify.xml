@@ -101,6 +101,7 @@
         android:layout_marginTop="5dp"
         android:background="@drawable/bg_oval"
         android:ems="10"
+        android:paddingHorizontal="16dp"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

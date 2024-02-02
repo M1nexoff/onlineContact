@@ -1,5 +1,6 @@
 package uz.gita.mycontactbyretrofit.presentation.ui.register
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ class RegisterScreen : Fragment(R.layout.screen_sign) {
     val binding by viewBinding(ScreenSignBinding::bind)
     val viewModel: RegisterViewModel by viewModels()
 
+    @SuppressLint("FragmentLiveDataObserve")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.loginText.setOnClickListener {
@@ -30,7 +32,7 @@ class RegisterScreen : Fragment(R.layout.screen_sign) {
                 binding.phone.text.toString(),
                 binding.password.text.toString()))
         }
-        viewModel.register.observe(viewLifecycleOwner){
+        viewModel.register.observe(this){
             if (it){
                 replaceScreen(VerifyScreen(binding.phone.text.toString()))
             }

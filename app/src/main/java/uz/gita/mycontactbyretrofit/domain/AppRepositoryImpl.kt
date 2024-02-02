@@ -15,7 +15,7 @@ import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.RegisterResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.VerifySmsResponse
 
-class AppRepositoryImpl(val api:Api,val pref: SharedPreferences): AppRepository {
+class AppRepositoryImpl private constructor(val api:Api,val pref: SharedPreferences): AppRepository {
     override var token: String = pref.getString("token","")!!
         set(value) {
             field = value

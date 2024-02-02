@@ -1,5 +1,8 @@
 package uz.gita.mycontactbyretrofit.presentation.ui
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -25,6 +28,7 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
     private val binding by viewBinding(ScreenContactBinding::bind)
     private val viewModel: ContactViewModel by viewModels()
     private val adapter= ContactAdapter()
+    @SuppressLint("FragmentLiveDataObserve")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = binding.myApply {
         adapter.clickListener = {
             val dialog = EventDialog()
@@ -43,14 +47,26 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         contactList.adapter = adapter
         contactList.layoutManager = LinearLayoutManager(requireContext())
         buttonAdd.setOnClickListener { viewModel.openAddContactDialog() }
-        logOut.setOnClickListener {viewModel.logOut()}
+        logOut.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Log Out")
+                .setMessage("Do you want to log out?")
+                .setNegativeButton("No", DialogInterface.OnClickListener { dialog, _ ->
+                    dialog.dismiss()
+                })
+                .setPositiveButton("Yes") { dialog, _ ->
+                    viewModel.logOut()
+                    dialog.dismiss()
+                }
+                .show()
+        }
 
         viewModel.loadAllContacts()
-        viewModel.logOut.observe(viewLifecycleOwner,this@ContactScreen.logOut)
-        viewModel.contactLiveData.observe(viewLifecycleOwner, contactObserver)
-        viewModel.progressLiveData.observe(viewLifecycleOwner, progressObserver)
-        viewModel.openAddContactDialogLiveData.observe(viewLifecycleOwner, openAddContactDialogObserver)
-        viewModel.errorLiveData.observe(viewLifecycleOwner, errorObserver)
+        viewModel.logOut.observe(this@ContactScreen,this@ContactScreen.logOut)
+        viewModel.contactLiveData.observe(this@ContactScreen, contactObserver)
+        viewModel.progressLiveData.observe(this@ContactScreen, progressObserver)
+        viewModel.openAddContactDialogLiveData.observe(this@ContactScreen, openAddContactDialogObserver)
+        viewModel.errorLiveData.observe(this@ContactScreen, errorObserver)
     }
     private val contactObserver = Observer<List<ContactResponse>> {
         adapter.submitList(it)

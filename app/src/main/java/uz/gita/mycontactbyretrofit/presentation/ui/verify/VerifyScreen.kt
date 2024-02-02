@@ -1,5 +1,6 @@
 package uz.gita.mycontactbyretrofit.presentation.ui.verify
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ class VerifyScreen(val phone: String): Fragment(R.layout.screen_verify) {
     val appRepository = AppRepositoryImpl.getAppRepository()
     val binding by viewBinding(ScreenVerifyBinding::bind)
     val viewModel: VerifyViewModel by viewModels()
+    @SuppressLint("FragmentLiveDataObserve")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         appRepository.phone = this.phone
@@ -26,7 +28,7 @@ class VerifyScreen(val phone: String): Fragment(R.layout.screen_verify) {
         binding.createText.setOnClickListener {
             replaceScreenWithoutSave(RegisterScreen())
         }
-        viewModel.verify.observe(viewLifecycleOwner){
+        viewModel.verify.observe(this){
             if (it){
                 replaceScreenWithoutSave(ContactScreen())
             }

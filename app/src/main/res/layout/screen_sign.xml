@@ -51,8 +51,8 @@
         android:layout_marginVertical="15dp"
         android:paddingEnd="15dp"
         android:id="@+id/imageView2"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:src="@drawable/group"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.2"
@@ -64,7 +64,7 @@
         android:textColor="#22215B"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="4dp"
         android:text="Sign in to"
         android:textSize="20dp"
         app:layout_constraintStart_toStartOf="@+id/imageView2"
@@ -74,7 +74,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="2dp"
         android:text="FirstName"
         android:textColor="#1B1D28"
         android:textSize="16sp"
@@ -120,7 +120,7 @@
         android:layout_height="wrap_content"
         android:text="Contact"
         android:textColor="#22215B"
-        android:textSize="38dp"
+        android:textSize="30dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/imageView2"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -134,13 +134,16 @@
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        android:paddingHorizontal="16dp"
+        />
 
     <EditText
         android:id="@+id/last_name"
         android:layout_width="312dp"
         android:layout_height="50dp"
         android:layout_marginTop="5dp"
+        android:paddingHorizontal="16dp"
         android:background="@drawable/bg_oval"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
@@ -150,6 +153,7 @@
     <EditText
         android:id="@+id/phone"
         android:layout_width="312dp"
+        android:paddingHorizontal="16dp"
         android:layout_height="50dp"
         android:background="@drawable/bg_oval"
         android:layout_marginTop="5dp"
@@ -161,6 +165,7 @@
     <EditText
         android:id="@+id/password"
         android:layout_width="312dp"
+        android:paddingHorizontal="16dp"
         android:layout_marginTop="5dp"
         android:layout_height="50dp"
         android:background="@drawable/bg_oval"
@@ -171,7 +176,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/create"
-        android:layout_width="311dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/bg_button"
         android:text="Create account"
@@ -180,7 +185,8 @@
         app:layout_constraintBottom_toTopOf="@+id/login_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password" />
+        app:layout_constraintTop_toBottomOf="@+id/password"
+        android:layout_marginHorizontal="54dp"/>
 
     <TextView
         android:id="@+id/login_text"
