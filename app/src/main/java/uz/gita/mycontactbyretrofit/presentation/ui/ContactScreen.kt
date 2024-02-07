@@ -6,24 +6,29 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import uz.gita.mycontactbyretrofit.R
-import uz.gita.mycontactbyretrofit.data.remote.response.ContactResponse
+import uz.gita.mycontactbyretrofit.data.model.ContactUIData
 import uz.gita.mycontactbyretrofit.databinding.ScreenContactBinding
 import uz.gita.mycontactbyretrofit.presentation.ui.adapter.ContactAdapter
-import uz.gita.mycontactbyretrofit.presentation.ui.dialog.AddContactDialog
-import uz.gita.mycontactbyretrofit.presentation.ui.dialog.EditContactDialog
+import uz.gita.mycontactbyretrofit.presentation.ui.dialog.AddContactScreen
+import uz.gita.mycontactbyretrofit.presentation.ui.dialog.EditContactScreen
 import uz.gita.mycontactbyretrofit.presentation.ui.dialog.EventDialog
 import uz.gita.mycontactbyretrofit.presentation.ui.login.LoginScreen
 import uz.gita.mycontactbyretrofit.presentation.viewmodel.ContactViewModel
 import uz.gita.mycontactbyretrofit.utils.myApply
+import uz.gita.mycontactbyretrofit.utils.replaceScreen
 import uz.gita.mycontactbyretrofit.utils.replaceScreenWithoutSave
+import uz.gita.mycontactbyretrofit.utils.showToast
 
+@AndroidEntryPoint
 class ContactScreen : Fragment(R.layout.screen_contact) {
     private val binding by viewBinding(ScreenContactBinding::bind)
     private val viewModel: ContactViewModel by viewModels()
@@ -33,16 +38,16 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         adapter.clickListener = {
             val dialog = EventDialog()
             dialog.setClickEditButtonListener {
-                val edit = EditContactDialog(requireContext(),it.firstName,it.lastName,it.phone)
-                edit.setEditContactListener { first, last, phone ->
-                    viewModel.updateContact(it.id,first, last, phone)
-                }
-                edit.show()
+                replaceScreen(EditContactScreen(it.id,it.firstName,it.lastName,it.phone))
             }
             dialog.setClickDeleteButtonListener {
-                viewModel.deleteContact(it.id)
+                viewModel.deleteContact(it.id, it.firstName, it.lastName, it.phone)
             }
             dialog.show(requireActivity().supportFragmentManager,null)
+        }
+        refreshLayout
+        buttonRefresh.setOnClickListener {
+            viewModel.loadAllContacts()
         }
         contactList.adapter = adapter
         contactList.layoutManager = LinearLayoutManager(requireContext())
@@ -50,10 +55,10 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         logOut.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Log Out")
-                .setMessage("Do you want to log out?")
-                .setNegativeButton("No", DialogInterface.OnClickListener { dialog, _ ->
+                .setMessage("Do you want to log out?\nAll local changes will be deleted")
+                .setNegativeButton("No") { dialog, _ ->
                     dialog.dismiss()
-                })
+                }
                 .setPositiveButton("Yes") { dialog, _ ->
                     viewModel.logOut()
                     dialog.dismiss()
@@ -66,27 +71,44 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         viewModel.contactLiveData.observe(this@ContactScreen, contactObserver)
         viewModel.progressLiveData.observe(this@ContactScreen, progressObserver)
         viewModel.openAddContactDialogLiveData.observe(this@ContactScreen, openAddContactDialogObserver)
+        viewModel.emptyStateLiveData.observe(viewLifecycleOwner, emptyStateObserver)
         viewModel.errorLiveData.observe(this@ContactScreen, errorObserver)
+        viewModel.notConnectionLiveData.observe(this@ContactScreen, notConnectionObserver)
+
+        val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                requireActivity().finish()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        binding.refreshLayout.setOnRefreshListener {
+            viewModel.loadAllContacts()
+            refreshLayout.isRefreshing = false
+        }
     }
-    private val contactObserver = Observer<List<ContactResponse>> {
+    private val contactObserver = Observer<List<ContactUIData>> {
+        binding.containerEmpty.visibility = View.GONE
         adapter.submitList(it)
     }
 
     private val progressObserver = Observer<Boolean> {
-        if (it) binding.progress.show()
-        else binding.progress.hide()
+        binding.refreshLayout.isRefreshing = it
+        binding.containerEmpty.visibility = View.GONE
+    }
+    private val emptyStateObserver = Observer<Unit> {
+        binding.containerEmpty.visibility = View.VISIBLE
     }
 
     private val openAddContactDialogObserver = Observer<Unit> {
-        val dialog = AddContactDialog()
-        dialog.setAddContactListener { firstName, lastName, phone ->
-            viewModel.addContact(firstName, lastName, phone)
-        }
-        dialog.show(childFragmentManager, "ADD_CONTACT")
+        replaceScreen(AddContactScreen())
     }
 
     private val errorObserver = Observer<String> {
         Snackbar.make(requireView(), it, Toast.LENGTH_SHORT).show()
+    }
+
+    private val notConnectionObserver = Observer<Unit> {
+        showToast("Not connection")
     }
     private val logOut = Observer<Boolean> {
         if (it){

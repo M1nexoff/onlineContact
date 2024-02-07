@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="#35373A"
     android:layout_margin="4dp"
     android:padding="8dp">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/photoGender"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
         android:src="@drawable/photo_man"
@@ -18,27 +19,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/textName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:textColor="#BF000000"
         android:textSize="16sp"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@id/textNumber"
         app:layout_constraintStart_toEndOf="@id/photoGender"
         app:layout_constraintTop_toTopOf="@id/photoGender"
-        tools:text="Muhammad Ganiyev" />
+        tools:text="Sample user" />
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/textNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
+        android:textColor="@color/colorUnselect"
         app:layout_constraintBottom_toBottomOf="@id/photoGender"
         app:layout_constraintStart_toStartOf="@id/textName"
         app:layout_constraintTop_toBottomOf="@id/textName"
-        tools:text="+998931234567" />
+        tools:text="+998901234567" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/buttonMore"
@@ -46,9 +48,25 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_more"
         android:padding="8dp"
+        android:tint="@android:color/white"
         android:background="?android:selectableItemBackgroundBorderless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:drawableStart="@drawable/time"
+        android:text="Test"
+        android:textColor="#fff"
+        android:drawablePadding="8dp"
+        app:layout_constraintLeft_toRightOf="@id/textNumber"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="@id/buttonMore"
+        android:background="@drawable/bg_status_edit"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

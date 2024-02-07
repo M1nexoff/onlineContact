@@ -9,10 +9,14 @@ import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
 import uz.gita.mycontactbyretrofit.data.remote.request.RegisterRequest
 import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.RegisterResponse
+import uz.gita.mycontactbyretrofit.domain.AppRepository
 import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
+import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
+import javax.inject.Inject
 
 class RegisterViewModel: ViewModel() {
-    val appRepository = AppRepositoryImpl.getAppRepository()
+    @Inject
+    lateinit var appRepository: AppRepository
     val errorMessage = MutableLiveData<String>()
     val register = MutableLiveData<Boolean>(false)
     fun register(request: RegisterRequest){

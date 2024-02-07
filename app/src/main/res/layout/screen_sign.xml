@@ -169,7 +169,7 @@
         android:layout_marginTop="5dp"
         android:layout_height="50dp"
         android:background="@drawable/bg_oval"
-        android:inputType="text"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textVieww13" />

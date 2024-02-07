@@ -9,6 +9,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
+        android:layout_margin="0.5dp"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ill"
@@ -111,20 +112,23 @@
         android:layout_marginTop="5dp"
         android:background="@drawable/bg_oval"
         android:ems="10"
-        android:inputType="text"
+        android:maxLines="1"
+        android:inputType="phone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
     <EditText
         android:id="@+id/password"
+        android:maxLines="1"
+        android:maxLength="10"
         android:layout_width="312dp"
         android:paddingHorizontal="16dp"
         android:layout_height="50dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/bg_oval"
         android:ems="10"
-        android:inputType="text"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView33" />

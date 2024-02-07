@@ -1,6 +1,7 @@
 package uz.gita.mycontactbyretrofit.domain
 
 import retrofit2.Call
+import uz.gita.mycontactbyretrofit.data.model.ContactUIData
 import uz.gita.mycontactbyretrofit.data.remote.request.CreateContactRequest
 import uz.gita.mycontactbyretrofit.data.remote.request.EditContactRequest
 import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
@@ -25,15 +26,36 @@ interface AppRepository {
     fun loginUser(loginRequest: LoginRequest): Call<LoginResponse>
 
     // 4. Add Contact
-    fun addContact( createContactRequest: CreateContactRequest): Call<ContactResponse>
+    fun addContact(
+        firstName: String,
+        lastName: String,
+        phone: String,
+        successBlock: () -> Unit,
+        errorBlock: (String) -> Unit
+    )
 
     // 5. Edit Contact
-    fun editContact( editContactRequest: EditContactRequest): Call<ContactResponse>
+    fun editContact(
+        id: Int,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        successBlock: () -> Unit,
+        errorBlock: (String) -> Unit
+    )
 
     // 6. Delete Contact
-    fun deleteContact( contactId: Int): Call<Unit>
+    fun deleteContact(
+        id: Int,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        successBlock: () -> Unit,
+        errorBlock: (String) -> Unit
+    )
 
     // 7. Get All Contacts
-    fun getAllContacts(): Call<List<ContactResponse>>
+    fun getAllContacts(successBlock: (List<ContactUIData>) -> Unit, errorBlock: (String) -> Unit)
 
+    fun syncWithServer(finishBlock: () -> Unit, errorBlock:(String) -> Unit)
 }

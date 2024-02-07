@@ -101,8 +101,9 @@
         android:layout_marginTop="5dp"
         android:background="@drawable/bg_oval"
         android:ems="10"
+        android:maxLength="7"
         android:paddingHorizontal="16dp"
-        android:inputType="text"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />

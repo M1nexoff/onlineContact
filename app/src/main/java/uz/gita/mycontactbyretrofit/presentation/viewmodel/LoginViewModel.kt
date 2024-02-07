@@ -7,10 +7,14 @@ import retrofit2.Callback
 import retrofit2.Response
 import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
 import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
+import uz.gita.mycontactbyretrofit.domain.AppRepository
 import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
+import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
+import javax.inject.Inject
 
 class LoginViewModel: ViewModel() {
-    val appRepository = AppRepositoryImpl.getAppRepository()
+    @Inject
+    lateinit var appRepository: AppRepository
     val errorMessage = MutableLiveData<String>()
     val login = MutableLiveData<Boolean>(false)
     fun login(login: String, password: String){
