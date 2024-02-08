@@ -5,7 +5,10 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import hilt_aggregated_deps._dagger_hilt_android_internal_lifecycle_HiltWrapper_DefaultViewModelFactories_ActivityModule
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +16,6 @@ import javax.inject.Singleton
 class NetworkStatusValidator @Inject constructor(@ApplicationContext val context: Context) {
 
     var hasNetwork: Boolean = false
-
     fun init(availableNetworkBlock: () -> Unit, lostConnection: () -> Unit) {
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -32,6 +34,7 @@ class NetworkStatusValidator @Inject constructor(@ApplicationContext val context
                 super.onLost(network)
                 lostConnection.invoke()
                 hasNetwork = false
+                Timber.tag("TTT").d("onLost")
             }
         }
 

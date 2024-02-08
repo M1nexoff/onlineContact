@@ -1,42 +1,63 @@
 package uz.gita.mycontactbyretrofit.presentation.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.contactadapterpattern.data.ResultData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uz.gita.mycontactbyretrofit.data.model.ContactUIData
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import javax.inject.Inject
 
-class ContactViewModel : ViewModel() {
-    val emptyStateLiveData = MutableLiveData(Unit)
-    val notConnectionLiveData = MutableLiveData(Unit)
-    @Inject
-    lateinit var appRepository : AppRepository
+@HiltViewModel
+class ContactViewModel @Inject constructor(private val appRepository: AppRepository) : ViewModel() {
+    private val _contactLiveData = MutableLiveData<List<ContactUIData>>()
+    val contactLiveData: LiveData<List<ContactUIData>> get() = _contactLiveData
 
-    val contactLiveData = MutableLiveData<List<ContactUIData>>()
-    val progressLiveData = MutableLiveData<Boolean>()
-    val openAddContactDialogLiveData = MutableLiveData<Unit>()
-    val errorLiveData = MutableLiveData<String>()
-    val logOut = MutableLiveData(false)
+    private val _progressLiveData = MutableLiveData<Boolean>()
+    val progressLiveData: LiveData<Boolean> get() = _progressLiveData
+
+    private val _openAddContactDialogLiveData = MutableLiveData<Unit>()
+    val openAddContactDialogLiveData: LiveData<Unit> get() = _openAddContactDialogLiveData
+
+    private val _emptyStateLiveData = MutableLiveData<Unit>()
+    val emptyStateLiveData: LiveData<Unit> get() = _emptyStateLiveData
+
+    private val _errorLiveData = MutableLiveData<String>()
+    val errorLiveData: LiveData<String> get() = _errorLiveData
+
+    private val _notConnectionLiveData = MutableLiveData<Unit>()
+    val notConnectionLiveData: LiveData<Unit> get() = _notConnectionLiveData
+
+    private val _logout = MutableLiveData<Boolean>()
+    val logout: LiveData<Boolean> get() = _logout
+
     fun loadAllContacts() {
-        progressLiveData.value = true
-        appRepository.getAllContacts(
-            successBlock = {
-                progressLiveData.value = false
-                if (it.isEmpty()) emptyStateLiveData.value = Unit
-                contactLiveData.value = it
-            },
-            errorBlock = {
-                errorLiveData.value = it
+        _progressLiveData.value = true
+        appRepository.getAllContacts().onEach {
+            when(it){
+                is ResultData.Success -> {
+                    _progressLiveData.value = false
+                    if (it.data.isEmpty()) _emptyStateLiveData.value = Unit
+                    _contactLiveData.value = it.data!!
+                }
+                is ResultData.Failure -> {
+                    _progressLiveData.value = false
+                    _errorLiveData.value = it.message
+                }
             }
-        )
+        }.launchIn(viewModelScope)
     }
 
     fun openAddContactDialog() {
-        openAddContactDialogLiveData.value = Unit
+        _openAddContactDialogLiveData.value = Unit
     }
 
-    fun deleteContact(id: Int, firstName: String, lastName: String, phone:String) {
-        progressLiveData.value = true
+    fun deleteContact(id: Int, firstName: String, lastName: String, phone: String) {
+        _progressLiveData.value = true
         appRepository.deleteContact(
             id = id,
             firstName = firstName,
@@ -44,19 +65,17 @@ class ContactViewModel : ViewModel() {
             phone = phone,
             successBlock = {
                 loadAllContacts()
-                progressLiveData.value = false
+                _progressLiveData.value = false
             },
             errorBlock = {
-                errorLiveData.value = it
-                progressLiveData.value = false
+                _errorLiveData.value = it
+                _progressLiveData.value = false
             }
         )
     }
 
     fun logOut() {
         appRepository.token = ""
-        logOut.value = true
+        _logout.value = true
     }
-
 }
-

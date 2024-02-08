@@ -2,7 +2,10 @@ package uz.gita.mycontactbyretrofit.domain
 
 import android.content.SharedPreferences
 import android.util.Log
+import com.example.contactadapterpattern.data.ResultData
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,6 +28,8 @@ import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.RegisterResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.VerifySmsResponse
 import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
+import uz.gita.mycontactbyretrofit.utils.flowResponse
+import uz.gita.mycontactbyretrofit.utils.toResultData
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,18 +52,19 @@ class AppRepositoryImpl @Inject constructor(
             pref.edit().putString("phone",value).apply()
         }
 
-    override fun registerUser(registerRequest: RegisterRequest): Call<RegisterResponse> {
-        return api.registerUser(registerRequest)
+    override fun registerUser(registerRequest: RegisterRequest): Flow<ResultData<RegisterResponse>> = flowResponse {
+        val res = api.registerUser(registerRequest).toResultData { it }
+        emit(res)
     }
 
-    override fun verifySmsCode(verifySmsRequest: VerifySmsRequest): Call<VerifySmsResponse> {
-        return api.verifySmsCode(verifySmsRequest)
+    override fun verifySmsCode(verifySmsRequest: VerifySmsRequest): Flow<ResultData<VerifySmsResponse>> = flowResponse {
+        val res = api.verifySmsCode(verifySmsRequest).toResultData { it }
+        emit(res)
     }
 
-    override fun loginUser(loginRequest: LoginRequest): Call<LoginResponse> {
-        return api.loginUser(loginRequest)
-    }
-
+    override fun loginUser(loginRequest: LoginRequest): Flow<ResultData<LoginResponse>> = flowResponse {
+        val res = api.loginUser(loginRequest).toResultData { it }
+            emit(res) }
     override fun addContact(
         firstName: String,
         lastName: String,
@@ -185,34 +191,18 @@ class AppRepositoryImpl @Inject constructor(
             successBlock.invoke()
         }
     }
-    override fun getAllContacts(successBlock: (List<ContactUIData>) -> Unit, errorBlock: (String) -> Unit){
-        api.getAllContacts(token).enqueue(object : Callback<List<ContactResponse>> {
-            override fun onResponse(
-                call: Call<List<ContactResponse>>,
-                response: Response<List<ContactResponse>>
-            ) {
-                if (response.isSuccessful && response.body() != null) {
-                    successBlock.invoke(
-                        mergeData(
-                            response.body()!!, contractDao.getAllContactFromLocal()
-                        )
-                    )
-                } else if (response.errorBody() != null) {
-                    val data =
-                        gson.fromJson(response.errorBody()!!.string(), ErrorResponse::class.java)
-                    if (data != null) {
-                        errorBlock.invoke(data.message)
-                    } else {
-                        errorBlock.invoke("Unknown error!")
-                    }
-                } else errorBlock.invoke("Unknown error!")
-            }
-
-            override fun onFailure(call: Call<List<ContactResponse>>, t: Throwable) {
-                t.message?.let { errorBlock.invoke(it) }
-            }
-        })
+    override fun getAllContacts(): Flow<ResultData<List<ContactUIData>>> = flowResponse {
+        val response = api.getAllContacts(token)
+        if (response.isSuccessful && response.body() != null) {
+            val remoteList = response.body()!!
+            val localList = contractDao.getAllContactFromLocal()
+            val mergedData = mergeData(remoteList, localList)
+            emit(ResultData.Success(mergedData))
+        } else {
+            emit(ResultData.Failure("Failed to fetch contacts"))
+        }
     }
+
     private fun mergeData(
         remoteList: List<ContactResponse>,
         localList: List<ContactEntity>,
@@ -220,7 +210,7 @@ class AppRepositoryImpl @Inject constructor(
         val result = ArrayList<ContactUIData>()
         result.addAll(remoteList.map { it.toUIData() })
 
-        var index = remoteList.lastOrNull()?.id ?: 0      // face
+        var index = remoteList.lastOrNull()?.id ?: 0
         localList.forEach { entity ->
             when (entity.statusCode.toStatusEnum()) {
                 StatusEnum.ADD -> {

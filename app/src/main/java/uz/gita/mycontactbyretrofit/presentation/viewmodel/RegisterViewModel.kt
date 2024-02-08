@@ -1,42 +1,39 @@
 package uz.gita.mycontactbyretrofit.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
+import androidx.lifecycle.viewModelScope
+import com.example.contactadapterpattern.data.ResultData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import uz.gita.mycontactbyretrofit.data.remote.request.RegisterRequest
-import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
 import uz.gita.mycontactbyretrofit.data.remote.response.RegisterResponse
 import uz.gita.mycontactbyretrofit.domain.AppRepository
-import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
-import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
 import javax.inject.Inject
 
-class RegisterViewModel: ViewModel() {
-    @Inject
-    lateinit var appRepository: AppRepository
+@HiltViewModel
+class RegisterViewModel @Inject constructor(private val appRepository: AppRepository) : ViewModel() {
+
     val errorMessage = MutableLiveData<String>()
-    val register = MutableLiveData<Boolean>(false)
-    fun register(request: RegisterRequest){
-        appRepository.registerUser(request).enqueue(object : Callback<RegisterResponse>{
-            override fun onResponse(call: Call<RegisterResponse>, response: Response<RegisterResponse>) {
-                if (response.isSuccessful){
-                    errorMessage.value = response.body()!!.message
-                    this@RegisterViewModel.register.value = true
-                }else{
-                    if (response.code() in 400..499){
-                        errorMessage.value = "Maydonlar xato kiritildi"
-                    }else{
-                        errorMessage.value = "Server ishlamayapti"
-                    }
+    val registerEvent = MutableLiveData<Boolean>()
+
+    fun register(request: RegisterRequest) {
+        appRepository.registerUser(request).onEach {
+            when(it){
+                is ResultData.Success-> {
+                    val registerResponse = it.data
+                    errorMessage.value = registerResponse.message
+                    registerEvent.value = true
+                }
+                is ResultData.Failure -> {
+                    errorMessage.value = it.message
+                    Timber.d("${it.message}")
                 }
             }
-
-            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
-                errorMessage.value = "Ulanishda xatolik"
-            }
-        })
+        }.launchIn(viewModelScope)
     }
 }

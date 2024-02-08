@@ -6,23 +6,26 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
+import dagger.hilt.android.AndroidEntryPoint
 import uz.gita.mycontactbyretrofit.R
-import uz.gita.mycontactbyretrofit.databinding.ScreenAddContactBinding
 import uz.gita.mycontactbyretrofit.databinding.ScreenEditContactBinding
 import uz.gita.mycontactbyretrofit.presentation.viewmodel.EditContactViewModel
 import uz.gita.mycontactbyretrofit.utils.myAddTextChangedListener
 import uz.gita.mycontactbyretrofit.utils.myApply
-import uz.gita.mycontactbyretrofit.utils.popBackStack
 import uz.gita.mycontactbyretrofit.utils.showToast
 import uz.gita.mycontactbyretrofit.utils.text
 
-class EditContactScreen(val aaa: Int,val firstName: String,val lastName: String,val phone: String) : Fragment(R.layout.screen_edit_contact) {
+@AndroidEntryPoint
+class EditContactScreen : Fragment(R.layout.screen_edit_contact) {
     private val binding by viewBinding(ScreenEditContactBinding::bind)
     private val viewModel: EditContactViewModel by viewModels()
     private var prepareFirstName = false
     private var prepareLastName = false
+    private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
     private var preparePhone = false
+    private val navArgs : EditContactScreenArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +35,9 @@ class EditContactScreen(val aaa: Int,val firstName: String,val lastName: String,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = binding.myApply {
         binding.myApply {
-            inputFirstName.setText(firstName)
-            inputLastName.setText(lastName)
-            inputPhone.setText(phone)
+            inputFirstName.setText(navArgs.firstName)
+            inputLastName.setText(navArgs.lastName)
+            inputPhone.setText(navArgs.phone)
         }
         binding.inputFirstName.myAddTextChangedListener {
             prepareFirstName = it.length > 3
@@ -49,10 +52,11 @@ class EditContactScreen(val aaa: Int,val firstName: String,val lastName: String,
             check()
         }
 
-        binding.buttonBack.setOnClickListener { popBackStack() }
+        binding.buttonBack.setOnClickListener {
+            navController.navigateUp()
+        }
         binding.buttonAdd.setOnClickListener {
-            viewModel.editContact(aaa, inputFirstName.text(), inputLastName.text(), inputPhone.text())
-
+            viewModel.editContact(navArgs.id, inputFirstName.text(), inputLastName.text(), inputPhone.text())
         }
         viewModel.closeScreenLiveData.observe(viewLifecycleOwner, closeScreenObserver)
         viewModel.progressLiveData.observe(viewLifecycleOwner, progressObserver)
@@ -62,7 +66,7 @@ class EditContactScreen(val aaa: Int,val firstName: String,val lastName: String,
         binding.buttonAdd.isEnabled = !( prepareFirstName && prepareLastName && preparePhone)
     }
 
-    private val closeScreenObserver = Observer<Unit> { popBackStack() }
+    private val closeScreenObserver = Observer<Unit> { navController.navigateUp() }
     private val errorMessageObserver = Observer<String> { showToast(it) }
     private val messageObserver = Observer<String> { showToast(it) }
     private val progressObserver = Observer<Boolean> {

@@ -2,13 +2,15 @@ package uz.gita.mycontactbyretrofit.presentation.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
 import uz.gita.mycontactbyretrofit.utils.MyEventBus
 import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
 import javax.inject.Inject
 
-class AddContactViewModel : ViewModel() {
+@HiltViewModel
+class AddContactViewModel @Inject constructor() : ViewModel() {
     @Inject
     lateinit var repository: AppRepository
     @Inject

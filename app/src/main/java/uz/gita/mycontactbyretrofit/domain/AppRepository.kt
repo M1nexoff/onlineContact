@@ -1,6 +1,9 @@
 package uz.gita.mycontactbyretrofit.domain
 
+import com.example.contactadapterpattern.data.ResultData
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Call
+import retrofit2.Response
 import uz.gita.mycontactbyretrofit.data.model.ContactUIData
 import uz.gita.mycontactbyretrofit.data.remote.request.CreateContactRequest
 import uz.gita.mycontactbyretrofit.data.remote.request.EditContactRequest
@@ -17,13 +20,13 @@ interface AppRepository {
     var phone: String
 
     // 1. Register User
-    fun registerUser(registerRequest: RegisterRequest): Call<RegisterResponse>
+    fun registerUser(registerRequest: RegisterRequest): Flow<ResultData<RegisterResponse>>
 
     // 2. Verify SMS Code
-    fun verifySmsCode(verifySmsRequest: VerifySmsRequest): Call<VerifySmsResponse>
+    fun verifySmsCode(verifySmsRequest: VerifySmsRequest): Flow<ResultData<VerifySmsResponse>>
 
     // 3. Login User
-    fun loginUser(loginRequest: LoginRequest): Call<LoginResponse>
+    fun loginUser(loginRequest: LoginRequest): Flow<ResultData<LoginResponse>>
 
     // 4. Add Contact
     fun addContact(
@@ -55,7 +58,7 @@ interface AppRepository {
     )
 
     // 7. Get All Contacts
-    fun getAllContacts(successBlock: (List<ContactUIData>) -> Unit, errorBlock: (String) -> Unit)
+    fun getAllContacts(): Flow<ResultData<List<ContactUIData>>>
 
     fun syncWithServer(finishBlock: () -> Unit, errorBlock:(String) -> Unit)
 }

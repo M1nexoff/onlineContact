@@ -2,39 +2,33 @@ package uz.gita.mycontactbyretrofit.presentation.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.lifecycle.viewModelScope
+import com.example.contactadapterpattern.data.ResultData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
-import uz.gita.mycontactbyretrofit.data.remote.response.LoginResponse
 import uz.gita.mycontactbyretrofit.domain.AppRepository
-import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
-import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
 import javax.inject.Inject
 
-class LoginViewModel: ViewModel() {
-    @Inject
-    lateinit var appRepository: AppRepository
+@HiltViewModel
+class LoginViewModel @Inject constructor(private val appRepository: AppRepository) : ViewModel() {
     val errorMessage = MutableLiveData<String>()
-    val login = MutableLiveData<Boolean>(false)
-    fun login(login: String, password: String){
-        appRepository.loginUser(LoginRequest(login, password)).enqueue(object : Callback<LoginResponse>{
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful){
-                    appRepository.token = response.body()!!.token
-                    this@LoginViewModel.login.value = true
-                }else{
-                    if (response.code() in 400..499){
-                        errorMessage.value = "Login yoki parol xato"
-                    }else{
-                        errorMessage.value = "Server ishlamayapti"
+    val loginEvent = MutableLiveData<Boolean>()
+
+    fun login(login: String, password: String) {
+        appRepository.loginUser(LoginRequest(login,password))
+            .onEach {
+                when (it) {
+                    is ResultData.Failure -> {
+                        errorMessage.value = it.message
+                    }
+                    is ResultData.Success -> {
+                        appRepository.token = it.data.token
+                        this@LoginViewModel.loginEvent.value = true
                     }
                 }
             }
-
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                errorMessage.value = "Ulanishda xatolik"
-            }
-        })
+            .launchIn(viewModelScope)
     }
 }

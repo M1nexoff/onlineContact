@@ -13,7 +13,6 @@ import uz.gita.mycontactbyretrofit.databinding.ScreenAddContactBinding
 import uz.gita.mycontactbyretrofit.presentation.viewmodel.AddContactViewModel
 import uz.gita.mycontactbyretrofit.utils.myAddTextChangedListener
 import uz.gita.mycontactbyretrofit.utils.myApply
-import uz.gita.mycontactbyretrofit.utils.popBackStack
 import uz.gita.mycontactbyretrofit.utils.showToast
 import uz.gita.mycontactbyretrofit.utils.text
 
@@ -24,6 +23,7 @@ class AddContactScreen : Fragment(R.layout.screen_add_contact){
     private var prepareFirstName = false
     private var prepareLastName = false
     private var preparePhone = false
+    private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +54,7 @@ class AddContactScreen : Fragment(R.layout.screen_add_contact){
     private fun check() {
         binding.buttonAdd.isEnabled = prepareFirstName && prepareLastName && preparePhone
     }
-    private val closeScreenObserver = Observer<Unit> { popBackStack() }
+    private val closeScreenObserver = Observer<Unit> { navController.navigateUp() }
     private val errorMessageObserver = Observer<String> { showToast(it) }
     private val messageObserver = Observer<String> { showToast(it)}
     private val progressObserver = Observer<Boolean> {

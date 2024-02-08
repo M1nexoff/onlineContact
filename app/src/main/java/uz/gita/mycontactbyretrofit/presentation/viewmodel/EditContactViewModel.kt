@@ -2,18 +2,15 @@ package uz.gita.mycontactbyretrofit.presentation.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import uz.gita.mycontactbyretrofit.domain.AppRepositoryImpl
 import uz.gita.mycontactbyretrofit.utils.MyEventBus
 import uz.gita.mycontactbyretrofit.utils.NetworkStatusValidator
 import javax.inject.Inject
 
-class EditContactViewModel : ViewModel() {
-    @Inject
-    lateinit var repository: AppRepository
-
-    @Inject
-    lateinit var networkStatusValidator: NetworkStatusValidator
+@HiltViewModel
+class EditContactViewModel @Inject constructor(private val repository: AppRepository, val networkStatusValidator: NetworkStatusValidator) : ViewModel() {
     val closeScreenLiveData = MutableLiveData<Unit>()
     val progressLiveData = MutableLiveData<Boolean>()
     val messageLiveData = MutableLiveData<String>()
