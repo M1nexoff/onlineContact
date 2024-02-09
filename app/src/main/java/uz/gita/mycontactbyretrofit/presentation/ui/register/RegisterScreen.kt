@@ -13,13 +13,14 @@ import uz.gita.mycontactbyretrofit.R
 import uz.gita.mycontactbyretrofit.data.remote.request.RegisterRequest
 import uz.gita.mycontactbyretrofit.databinding.ScreenSignBinding
 import uz.gita.mycontactbyretrofit.domain.AppRepository
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.RegisterViewModelImpl
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class RegisterScreen: Fragment(R.layout.screen_sign) {
     @Inject lateinit var appRepository: AppRepository
     private val binding by viewBinding(ScreenSignBinding::bind)
-    private val viewModel: RegisterViewModel by viewModels()
+    private val viewModel: RegisterViewModel by viewModels<RegisterViewModelImpl>()
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
 
     @SuppressLint("FragmentLiveDataObserve")
@@ -34,12 +35,6 @@ class RegisterScreen: Fragment(R.layout.screen_sign) {
                 binding.lastName.text.toString(),
                 binding.phone.text.toString(),
                 binding.password.text.toString()))
-        }
-        viewModel.registerEvent.observe(this){
-            if (it){
-                appRepository.phone = binding.phone.text.toString()
-                navController.navigate(RegisterScreenDirections.actionRegisterScreenToVerifyScreen())
-            }
         }
     }
 }

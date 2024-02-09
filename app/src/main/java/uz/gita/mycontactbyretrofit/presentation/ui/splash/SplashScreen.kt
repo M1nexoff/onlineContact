@@ -15,12 +15,13 @@ import uz.gita.mycontactbyretrofit.presentation.viewmodel.SplashViewModel
 import javax.inject.Inject
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collect
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.SplashViewModelImpl
 
 @AndroidEntryPoint
 class SplashScreen : Fragment() {
 
     private lateinit var binding: ScreenSplashBinding
-    private val viewModel: SplashViewModel by viewModels()
+    private val viewModel: SplashViewModel by viewModels<SplashViewModelImpl>()
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
 
     override fun onCreateView(
@@ -34,16 +35,5 @@ class SplashScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.checkAuthentication()
-        observeNavigation()
-    }
-
-    private fun observeNavigation() {
-        viewModel.navigateToNextScreen.observe(viewLifecycleOwner) { destination ->
-            if (destination){
-                navController.navigate(SplashScreenDirections.actionSplashScreenToContactScreen())
-            }else{
-                navController.navigate(SplashScreenDirections.actionSplashScreenToLoginScreen())
-            }
-        }
     }
 }

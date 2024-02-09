@@ -5,13 +5,18 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uz.gita.mycontactbyretrofit.R
 import uz.gita.mycontactbyretrofit.databinding.ScreenEditContactBinding
 import uz.gita.mycontactbyretrofit.presentation.viewmodel.EditContactViewModel
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.EditContactViewModelImpl
 import uz.gita.mycontactbyretrofit.utils.myAddTextChangedListener
 import uz.gita.mycontactbyretrofit.utils.myApply
 import uz.gita.mycontactbyretrofit.utils.showToast
@@ -20,7 +25,7 @@ import uz.gita.mycontactbyretrofit.utils.text
 @AndroidEntryPoint
 class EditContactScreen : Fragment(R.layout.screen_edit_contact) {
     private val binding by viewBinding(ScreenEditContactBinding::bind)
-    private val viewModel: EditContactViewModel by viewModels()
+    private val viewModel: EditContactViewModel by viewModels<EditContactViewModelImpl>()
     private var prepareFirstName = false
     private var prepareLastName = false
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
@@ -29,8 +34,9 @@ class EditContactScreen : Fragment(R.layout.screen_edit_contact) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.errorMessageLiveData.observe(this, errorMessageObserver)
-        viewModel.messageLiveData.observe(this, messageObserver)
+        viewModel.message = {
+            showToast(it)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = binding.myApply {
@@ -58,26 +64,12 @@ class EditContactScreen : Fragment(R.layout.screen_edit_contact) {
         binding.buttonAdd.setOnClickListener {
             viewModel.editContact(navArgs.id, inputFirstName.text(), inputLastName.text(), inputPhone.text())
         }
-        viewModel.closeScreenLiveData.observe(viewLifecycleOwner, closeScreenObserver)
-        viewModel.progressLiveData.observe(viewLifecycleOwner, progressObserver)
+        viewModel.progress.onEach {
+
+        }.flowWithLifecycle(lifecycle).launchIn(lifecycleScope)
     }
 
     private fun check() {
         binding.buttonAdd.isEnabled = !( prepareFirstName && prepareLastName && preparePhone)
-    }
-
-    private val closeScreenObserver = Observer<Unit> { navController.navigateUp() }
-    private val errorMessageObserver = Observer<String> { showToast(it) }
-    private val messageObserver = Observer<String> { showToast(it) }
-    private val progressObserver = Observer<Boolean> {
-        if (it) {
-            binding.buttonAdd.visibility = View.GONE
-            binding.frameLoading.visibility = View.VISIBLE
-            binding.progress.show()
-        } else {
-            binding.buttonAdd.visibility = View.VISIBLE
-            binding.frameLoading.visibility = View.GONE
-            binding.progress.hide()
-        }
     }
 }

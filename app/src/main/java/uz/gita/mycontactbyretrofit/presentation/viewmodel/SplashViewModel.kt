@@ -10,19 +10,6 @@ import kotlinx.coroutines.launch
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import javax.inject.Inject
 
-@HiltViewModel
-class SplashViewModel @Inject constructor(
-    private val appRepository: AppRepository
-) : ViewModel() {
-
-    private val _navigateToNextScreen = MutableLiveData(false)
-    val navigateToNextScreen: LiveData<Boolean> = _navigateToNextScreen
-
-    fun checkAuthentication() {
-        viewModelScope.launch {
-            delay(1000)
-            val destination = appRepository.token.isEmpty()
-            _navigateToNextScreen.value = destination
-        }
-    }
+interface SplashViewModel {
+    fun checkAuthentication()
 }

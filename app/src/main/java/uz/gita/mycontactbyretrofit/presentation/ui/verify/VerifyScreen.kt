@@ -11,11 +11,12 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import uz.gita.mycontactbyretrofit.R
 import uz.gita.mycontactbyretrofit.databinding.ScreenVerifyBinding
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.VerifyViewModelImpl
 
 @AndroidEntryPoint
 class VerifyScreen: Fragment(R.layout.screen_verify) {
     private val binding by viewBinding(ScreenVerifyBinding::bind)
-    private val viewModel: VerifyViewModel by viewModels()
+    private val viewModel: VerifyViewModel by viewModels<VerifyViewModelImpl>()
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
     @SuppressLint("FragmentLiveDataObserve")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -25,11 +26,6 @@ class VerifyScreen: Fragment(R.layout.screen_verify) {
         }
         binding.createText.setOnClickListener {
             navController.navigateUp()
-        }
-        viewModel.verifyEvent.observe(this){
-            if (it){
-                navController.navigate(VerifyScreenDirections.actionVerifyScreenToContactScreen())
-            }
         }
     }
 }

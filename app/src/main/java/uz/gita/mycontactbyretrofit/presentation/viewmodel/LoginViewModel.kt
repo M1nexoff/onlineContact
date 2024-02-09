@@ -11,24 +11,7 @@ import uz.gita.mycontactbyretrofit.data.remote.request.LoginRequest
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import javax.inject.Inject
 
-@HiltViewModel
-class LoginViewModel @Inject constructor(private val appRepository: AppRepository) : ViewModel() {
-    val errorMessage = MutableLiveData<String>()
-    val loginEvent = MutableLiveData<Boolean>()
-
-    fun login(login: String, password: String) {
-        appRepository.loginUser(LoginRequest(login,password))
-            .onEach {
-                when (it) {
-                    is ResultData.Failure -> {
-                        errorMessage.value = it.message
-                    }
-                    is ResultData.Success -> {
-                        appRepository.token = it.data.token
-                        this@LoginViewModel.loginEvent.value = true
-                    }
-                }
-            }
-            .launchIn(viewModelScope)
-    }
+interface LoginViewModel {
+    var errorMessage: ((String)->Unit)?
+    fun login(login: String, password: String)
 }

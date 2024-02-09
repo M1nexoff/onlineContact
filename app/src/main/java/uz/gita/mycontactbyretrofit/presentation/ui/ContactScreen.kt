@@ -1,6 +1,5 @@
 package uz.gita.mycontactbyretrofit.presentation.ui
 
-import uz.gita.mycontactbyretrofit.presentation.viewmodel.ContactViewModel
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
@@ -10,23 +9,29 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uz.gita.mycontactbyretrofit.R
 import uz.gita.mycontactbyretrofit.data.model.ContactUIData
 import uz.gita.mycontactbyretrofit.databinding.ScreenContactBinding
 import uz.gita.mycontactbyretrofit.presentation.ui.adapter.ContactAdapter
 import uz.gita.mycontactbyretrofit.presentation.ui.dialog.EventDialog
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.ContactViewModel
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.ContactViewModelImpl
 import uz.gita.mycontactbyretrofit.utils.myApply
 import uz.gita.mycontactbyretrofit.utils.showToast
 
 @AndroidEntryPoint
 class ContactScreen : Fragment(R.layout.screen_contact) {
     private val binding by viewBinding(ScreenContactBinding::bind)
-    private val viewModel: ContactViewModel by viewModels()
+    private val viewModel: ContactViewModel by viewModels<ContactViewModelImpl>()
     private val adapter= ContactAdapter()
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
     @SuppressLint("FragmentLiveDataObserve")
@@ -63,14 +68,15 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         }
 
         viewModel.loadAllContacts()
-        viewModel.logout.observe(this@ContactScreen,this@ContactScreen.logOut)
+        viewModel.logout = {
+            navController.navigate(ContactScreenDirections.actionContactScreenToLoginScreen())
+        }
         viewModel.contactLiveData.observe(this@ContactScreen, contactObserver)
-        viewModel.progressLiveData.observe(this@ContactScreen, progressObserver)
-        viewModel.openAddContactDialogLiveData.observe(this@ContactScreen, openAddContactDialogObserver)
-        viewModel.emptyStateLiveData.observe(viewLifecycleOwner, emptyStateObserver)
+        viewModel.progressStateFlow.onEach {
+            binding.refreshLayout.isRefreshing = it
+            binding.containerEmpty.visibility = View.GONE
+        }.flowWithLifecycle(lifecycle).launchIn(lifecycleScope)
         viewModel.errorLiveData.observe(this@ContactScreen, errorObserver)
-        viewModel.notConnectionLiveData.observe(this@ContactScreen, notConnectionObserver)
-
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 requireActivity().finish()
@@ -83,7 +89,7 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
         }
     }
     private val contactObserver = Observer<List<ContactUIData>> {
-        binding.containerEmpty.visibility = View.GONE
+        binding.containerEmpty.visibility =if(it.isEmpty()) View.VISIBLE else View.GONE
         adapter.submitList(it)
     }
 
@@ -96,7 +102,7 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
     }
 
     private val openAddContactDialogObserver = Observer<Unit> {
-        navController.navigate(ContactScreenDirections.actionContactScreenToAddContactScreen())
+
     }
 
     private val errorObserver = Observer<String> {
@@ -105,11 +111,6 @@ class ContactScreen : Fragment(R.layout.screen_contact) {
 
     private val notConnectionObserver = Observer<Unit> {
         showToast("Not connection")
-    }
-    private val logOut = Observer<Boolean> {
-        if (it){
-            navController.navigate(ContactScreenDirections.actionContactScreenToLoginScreen())
-        }
     }
 
 }

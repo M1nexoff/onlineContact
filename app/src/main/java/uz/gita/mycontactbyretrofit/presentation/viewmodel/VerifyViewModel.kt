@@ -14,31 +14,7 @@ import uz.gita.mycontactbyretrofit.data.remote.response.VerifySmsResponse
 import uz.gita.mycontactbyretrofit.domain.AppRepository
 import javax.inject.Inject
 
-@HiltViewModel
-class VerifyViewModel @Inject constructor(private val appRepository: AppRepository) : ViewModel() {
-
-    private val _errorMessage = MutableLiveData<String>()
-    val errorMessage: MutableLiveData<String>
-        get() = _errorMessage
-
-    private val _verifyEvent = MutableLiveData<Boolean>()
-    val verifyEvent: MutableLiveData<Boolean>
-        get() = _verifyEvent
-
-    fun verify(code: String) {
-        viewModelScope.launch {
-            appRepository.verifySmsCode(VerifySmsRequest(appRepository.phone, code)).onEach {
-                when(it){
-                    is ResultData.Success-> {
-                        val verifySmsResponse = it.data
-                        appRepository.token = verifySmsResponse.token
-                        _verifyEvent.value = true
-                    }
-                    is ResultData.Failure -> {
-                        errorMessage.value = it.message
-                    }
-                }
-            }.launchIn(viewModelScope)
-        }
-    }
+interface VerifyViewModel {
+    var errorMessage: ((String)->Unit)?
+    fun verify(code: String)
 }

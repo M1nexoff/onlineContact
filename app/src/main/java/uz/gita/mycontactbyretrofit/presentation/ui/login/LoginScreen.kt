@@ -12,11 +12,12 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import uz.gita.mycontactbyretrofit.R
 import uz.gita.mycontactbyretrofit.databinding.ScreenLoginBinding
+import uz.gita.mycontactbyretrofit.presentation.viewmodel.impl.LoginViewModelImpl
 
 @AndroidEntryPoint
 class LoginScreen : Fragment(R.layout.screen_login) {
     private val binding by viewBinding(ScreenLoginBinding::bind)
-    private val viewModel: LoginViewModel by viewModels<LoginViewModel>()
+    private val viewModel: LoginViewModel by viewModels<LoginViewModelImpl>()
     private val navController by lazy(LazyThreadSafetyMode.NONE) { findNavController() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -26,13 +27,7 @@ class LoginScreen : Fragment(R.layout.screen_login) {
             viewModel.login(binding.phone.text.toString(), binding.password.text.toString())
         }
 
-        viewModel.loginEvent.observe(viewLifecycleOwner) { success ->
-            if (success) {
-                navController.navigate(LoginScreenDirections.actionLoginScreenToContactScreen())
-            }
-        }
-
-        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+        viewModel.errorMessage = { errorMessage ->
             Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_LONG).show()
         }
 
